@@ -13,6 +13,7 @@ option(IMGUI_GLUT "add GLUT onto imgui." OFF)
 option(IMGUI_METAL "add METAL onto imgui." OFF)
 option(IMGUI_OPENGL2 "add OPENGL2 onto imgui." OFF)
 option(IMGUI_OPENGL3 "add OPENGL3 onto imgui." OFF)
+option(IMGUI_OPENGL3_LOADER "add OPENGL3 loader onto imgui." OFF)
 option(IMGUI_OSX "add OSX onto imgui." OFF)
 option(IMGUI_SDL2 "add SDL2 onto imgui." OFF)
 option(IMGUI_SDL2_RENDERER "add SDL2 RENDERER onto imgui." OFF)
@@ -128,6 +129,11 @@ if(IMGUI_OPENGL3)
             PUBLIC
             backends/imgui_impl_opengl3.cpp
             backends/imgui_impl_opengl3.h
+            )
+endif()
+if(IMGUI_OPENGL3_LOADER)
+    target_sources(imgui
+            PUBLIC
             backends/imgui_impl_opengl3_loader.h
             )
 endif()
