@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.24)
 
 project(imgui VERSION 1.89.7 DESCRIPTION "The library Dear ImGUI by Omar Cornut in from the master branch.")
 
+option(IMGUI_CUSTOM_LOADER "tell to ImGui you're using an other loader." OFF)
+
 option(IMGUI_ALLEGRO5 "add ALLEGRO5 onto imgui." OFF)
 option(IMGUI_ANDROID "add ANDROID onto imgui." OFF)
 option(IMGUI_DX9 "add DX9 onto imgui." OFF)
@@ -48,6 +50,10 @@ target_include_directories(imgui PUBLIC
         ./
         backends/
         )
+
+if(IMGUI_CUSTOM_LOADER)
+    target_compile_definitions(imgui PUBLIC IMGUI_IMPL_OPENGL_LOADER_CUSTOM=1)
+endif ()
 
 if(IMGUI_ALLEGRO5)
     target_sources(imgui
