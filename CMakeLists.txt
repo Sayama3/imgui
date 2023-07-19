@@ -45,12 +45,8 @@ target_sources(imgui
         )
 
 target_include_directories(imgui PUBLIC
-        imconfig.h
-        imgui.h
-        imgui_internal.h
-        imstb_rectpack.h
-        imstb_textedit.h
-        imstb_truetype.h
+        ./
+        backends/
         )
 
 if(IMGUI_ALLEGRO5)
@@ -59,7 +55,6 @@ if(IMGUI_ALLEGRO5)
             backends/imgui_impl_allegro5.cpp
             backends/imgui_impl_allegro5.h
             )
-    target_include_directories(imgui PUBLIC backends/imgui_impl_allegro5.h)
 endif()
 
 if(IMGUI_ANDROID)
@@ -68,7 +63,6 @@ if(IMGUI_ANDROID)
             backends/imgui_impl_android.cpp
             backends/imgui_impl_android.h
             )
-    target_include_directories(imgui PUBLIC backends/imgui_impl_android.h)
 endif()
 
 if(IMGUI_DX9)
@@ -77,7 +71,6 @@ if(IMGUI_DX9)
             backends/imgui_impl_dx9.cpp
             backends/imgui_impl_dx9.h
             )
-    target_include_directories(imgui PUBLIC backends/imgui_impl_dx9.h)
 endif()
 
 if(IMGUI_DX10)
@@ -86,7 +79,6 @@ if(IMGUI_DX10)
             backends/imgui_impl_dx10.cpp
             backends/imgui_impl_dx10.h
             )
-    target_include_directories(imgui PUBLIC backends/imgui_impl_dx10.h)
 endif()
 
 if(IMGUI_DX11)
@@ -95,7 +87,6 @@ if(IMGUI_DX11)
             backends/imgui_impl_dx11.cpp
             backends/imgui_impl_dx11.h
             )
-    target_include_directories(imgui PUBLIC backends/imgui_impl_dx11.h)
 endif()
 
 if(IMGUI_DX12)
@@ -104,7 +95,6 @@ if(IMGUI_DX12)
             backends/imgui_impl_dx12.cpp
             backends/imgui_impl_dx12.h
             )
-    target_include_directories(imgui PUBLIC backends/imgui_impl_dx12.h)
 endif()
 
 if(IMGUI_GLFW)
@@ -113,7 +103,6 @@ if(IMGUI_GLFW)
             backends/imgui_impl_glfw.cpp
             backends/imgui_impl_glfw.h
             )
-    target_include_directories(imgui PUBLIC backends/imgui_impl_glfw.h)
 endif()
 
 if(IMGUI_GLUT)
@@ -122,7 +111,6 @@ if(IMGUI_GLUT)
             backends/imgui_impl_glut.cpp
             backends/imgui_impl_glut.h
             )
-    target_include_directories(imgui PUBLIC backends/imgui_impl_glut.h)
 endif()
 
 if(IMGUI_METAL)
@@ -131,7 +119,6 @@ if(IMGUI_METAL)
             backends/imgui_impl_metal.mm
             backends/imgui_impl_metal.h
             )
-    target_include_directories(imgui PUBLIC backends/imgui_impl_metal.h)
 endif()
 
 if(IMGUI_OPENGL2)
@@ -140,7 +127,6 @@ if(IMGUI_OPENGL2)
             backends/imgui_impl_opengl2.cpp
             backends/imgui_impl_opengl2.h
             )
-    target_include_directories(imgui PUBLIC backends/imgui_impl_opengl2.h)
 endif()
 
 if(IMGUI_OPENGL3)
@@ -149,14 +135,12 @@ if(IMGUI_OPENGL3)
             backends/imgui_impl_opengl3.cpp
             backends/imgui_impl_opengl3.h
             )
-    target_include_directories(imgui PUBLIC backends/imgui_impl_opengl3.h)
 endif()
 if(IMGUI_OPENGL3_LOADER)
     target_sources(imgui
             PUBLIC
             backends/imgui_impl_opengl3_loader.h
             )
-    target_include_directories(imgui PUBLIC backends/imgui_impl_opengl3_loader.h)
 endif()
 
 if(IMGUI_OSX)
@@ -165,7 +149,6 @@ if(IMGUI_OSX)
             backends/imgui_impl_osx.mm
             backends/imgui_impl_osx.h
             )
-    target_include_directories(imgui PUBLIC backends/imgui_impl_osx.h)
 endif()
 
 if(IMGUI_SDL2)
@@ -174,7 +157,6 @@ if(IMGUI_SDL2)
             backends/imgui_impl_sdl2.cpp
             backends/imgui_impl_sdl2.h
             )
-    target_include_directories(imgui PUBLIC backends/imgui_impl_sdl2.h)
 endif()
 
 if(IMGUI_SDL2_RENDERER)
@@ -183,7 +165,6 @@ if(IMGUI_SDL2_RENDERER)
             backends/imgui_impl_sdlrenderer2.cpp
             backends/imgui_impl_sdlrenderer2.h
             )
-    target_include_directories(imgui PUBLIC backends/imgui_impl_sdlrenderer2.h)
 endif()
 
 if(IMGUI_SDL3)
@@ -192,7 +173,6 @@ if(IMGUI_SDL3)
             backends/imgui_impl_sdl3.cpp
             backends/imgui_impl_sdl3.h
             )
-    target_include_directories(imgui PUBLIC backends/imgui_impl_sdl3.h)
 endif()
 
 if(IMGUI_SDL3_RENDERER)
@@ -201,7 +181,6 @@ if(IMGUI_SDL3_RENDERER)
             backends/imgui_impl_sdlrenderer3.cpp
             backends/imgui_impl_sdlrenderer3.h
             )
-    target_include_directories(imgui PUBLIC backends/imgui_impl_sdlrenderer3.h)
 endif()
 
 if(IMGUI_VULKAN)
@@ -210,7 +189,6 @@ if(IMGUI_VULKAN)
             backends/imgui_impl_vulkan.cpp
             backends/imgui_impl_vulkan.h
             )
-    target_include_directories(imgui PUBLIC backends/imgui_impl_vulkan.h)
 endif()
 
 if(IMGUI_WGPU)
@@ -219,7 +197,6 @@ if(IMGUI_WGPU)
             backends/imgui_impl_wgpu.cpp
             backends/imgui_impl_wgpu.h
             )
-    target_include_directories(imgui PUBLIC backends/imgui_impl_wgpu.h)
 endif()
 
 if(IMGUI_WIN32)
@@ -228,7 +205,6 @@ if(IMGUI_WIN32)
             backends/imgui_impl_win32.cpp
             backends/imgui_impl_win32.h
             )
-    target_include_directories(imgui PUBLIC backends/imgui_impl_win32.h)
 endif()
 
 if(IMGUI_STDLIB)
@@ -237,7 +213,7 @@ if(IMGUI_STDLIB)
             misc/cpp/imgui_stdlib.cpp
             misc/cpp/imgui_stdlib.h
             )
-    target_include_directories(imgui PUBLIC misc/cpp/imgui_stdlib.h)
+    target_include_directories(imgui PUBLIC misc/cpp/)
 endif()
 
 set_target_properties(imgui PROPERTIES VERSION ${PROJECT_VERSION})
