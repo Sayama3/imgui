@@ -26,9 +26,16 @@ option(IMGUI_WGPU "add WGPU onto imgui." OFF)
 option(IMGUI_WIN32 "add WIN32 onto imgui." OFF)
 option(IMGUI_STDLIB "add STDLIB onto imgui." OFF)
 
+option(IMGUI_STATIC "Build ImGui as a Static Library" ON)
+
 include(GNUInstallDirs)
 
-add_library(imgui)
+if(IMGUI_STATIC)
+    add_library(imgui STATIC)
+else()
+    add_library(imgui SHARED)
+endif()
+
 target_compile_features(imgui PUBLIC cxx_std_17)
 
 target_sources(imgui
