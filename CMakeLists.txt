@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.16)
 
 project(imgui VERSION 1.89.7 DESCRIPTION "The library Dear ImGUI by Omar Cornut in from the master branch.")
 
