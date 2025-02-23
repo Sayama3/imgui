@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(imgui VERSION 1.89.7 DESCRIPTION "The library Dear ImGUI by Omar Cornut in from the master branch.")
+project(imgui VERSION 1.91.8 DESCRIPTION "The library Dear ImGUI by Omar Cornut in from the master branch.")
 
 option(IMGUI_CUSTOM_LOADER "tell to ImGui you're using an other loader." OFF)
 
@@ -25,10 +25,18 @@ option(IMGUI_VULKAN "add VULKAN onto imgui." OFF)
 option(IMGUI_WGPU "add WGPU onto imgui." OFF)
 option(IMGUI_WIN32 "add WIN32 onto imgui." OFF)
 option(IMGUI_STDLIB "add STDLIB onto imgui." OFF)
+option(IMGUI_FREETYPE "add Freetype onto imgui." OFF)
+
+option(IMGUI_STATIC "Build ImGui as a Static Library" ON)
 
 include(GNUInstallDirs)
 
-add_library(imgui)
+if(IMGUI_STATIC)
+    add_library(imgui STATIC)
+else()
+    add_library(imgui SHARED)
+endif()
+
 target_compile_features(imgui PUBLIC cxx_std_17)
 
 target_sources(imgui
@@ -220,6 +228,15 @@ if(IMGUI_STDLIB)
             misc/cpp/imgui_stdlib.h
             )
     target_include_directories(imgui PUBLIC misc/cpp/)
+endif()
+
+if(IMGUI_FREETYPE)
+    target_sources(imgui
+            PUBLIC
+            misc/freetype/imgui_freetype.cpp
+            misc/freetype/imgui_freetype.h
+            )
+    target_include_directories(imgui PUBLIC misc/freetype/)
 endif()
 
 set_target_properties(imgui PROPERTIES VERSION ${PROJECT_VERSION})
