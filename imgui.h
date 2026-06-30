@@ -30,7 +30,7 @@
 // Library Version
 // (Integer encoded as XYYZZ for use in #if preprocessor conditionals, e.g. '#if IMGUI_VERSION_NUM >= 12345')
 #define IMGUI_VERSION       "1.92.9 WIP"
-#define IMGUI_VERSION_NUM   19281
+#define IMGUI_VERSION_NUM   19284
 #define IMGUI_HAS_TABLE             // Added BeginTable() - from IMGUI_VERSION_NUM >= 18000
 #define IMGUI_HAS_TEXTURES          // Added ImGuiBackendFlags_RendererHasTextures - from IMGUI_VERSION_NUM >= 19198
 #define IMGUI_HAS_VIEWPORT          // In 'docking' WIP branch.
@@ -657,7 +657,7 @@ namespace ImGui
     // Widgets: Images
     // - Read about ImTextureID/ImTextureRef  here: https://github.com/ocornut/imgui/wiki/Image-Loading-and-Displaying-Examples
     // - 'uv0' and 'uv1' are texture coordinates. Read about them from the same link above.
-    // - Image() pads adds style.ImageBorderSize on each side, ImageButton() adds style.FramePadding on each side.
+    // - Image() adds style.ImageBorderSize on each side, ImageButton() adds style.FramePadding on each side.
     // - ImageButton() draws a background based on regular Button() color + optionally an inner background if specified.
     // - An obsolete version of Image(), before 1.91.9 (March 2025), had a 'tint_col' parameter which is now supported by the ImageWithBg() function.
     IMGUI_API void          Image(ImTextureRef tex_ref, const ImVec2& image_size, const ImVec2& uv0 = ImVec2(0, 0), const ImVec2& uv1 = ImVec2(1, 1));
@@ -817,7 +817,7 @@ namespace ImGui
     // - Use BeginMenuBar() on a window ImGuiWindowFlags_MenuBar to append to its menu bar.
     // - Use BeginMainMenuBar() to create a menu bar at the top of the screen and append to it.
     // - Use BeginMenu() to create a menu. You can call BeginMenu() multiple time with the same identifier to append more items to it.
-    // - Not that MenuItem() keyboardshortcuts are displayed as a convenience but _not processed_ by Dear ImGui at the moment.
+    // - Note that MenuItem() keyboard shortcuts are displayed as a convenience but _not processed_ by Dear ImGui at the moment.
     IMGUI_API bool          BeginMenuBar();                                                     // append to menu-bar of current window (requires ImGuiWindowFlags_MenuBar flag set on parent window).
     IMGUI_API void          EndMenuBar();                                                       // only call EndMenuBar() if BeginMenuBar() returns true!
     IMGUI_API bool          BeginMainMenuBar();                                                 // create and append to a full screen menu-bar.
@@ -917,14 +917,15 @@ namespace ImGui
     IMGUI_API bool          TableSetColumnIndex(int column_n);                  // append into the specified column. Return true when column is visible.
 
     // Tables: Headers & Columns declaration
-    // - Use TableSetupColumn() to specify label, resizing policy, default width/weight, id, various other flags etc.
+    // - Use TableSetupColumn() to specify label, resizing policy, default width/weight, various other flags etc.
+    //   (the trailing 'ImGuiID user_data', which used to be referred to as 'ImGuiID user_id', is merely user data that is blindly copied in ImGuiTableColumnSortSpecs).
     // - Use TableHeadersRow() to create a header row and automatically submit a TableHeader() for each column.
     //   Headers are required to perform: reordering, sorting, and opening the context menu.
     //   The context menu can also be made available in columns body using ImGuiTableFlags_ContextMenuInBody.
     // - You may manually submit headers using TableNextRow() + TableHeader() calls, but this is only useful in
     //   some advanced use cases (e.g. adding custom widgets in header row).
     // - Use TableSetupScrollFreeze() to lock columns/rows so they stay visible when scrolled. When freezing columns you would usually also use ImGuiTableColumnFlags_NoHide on them.
-    IMGUI_API void          TableSetupColumn(const char* label, ImGuiTableColumnFlags flags = 0, float init_width_or_weight = 0.0f, ImGuiID user_id = 0);
+    IMGUI_API void          TableSetupColumn(const char* label, ImGuiTableColumnFlags flags = 0, float init_width_or_weight = 0.0f, ImGuiID user_data = 0);
     IMGUI_API void          TableSetupScrollFreeze(int cols, int rows);         // lock columns/rows so they stay visible when scrolled.
     IMGUI_API void          TableHeader(const char* label);                     // submit one header cell manually (rarely used)
     IMGUI_API void          TableHeadersRow();                                  // submit a row with headers cells based on data provided to TableSetupColumn() + submit context menu
@@ -1378,7 +1379,7 @@ enum ImGuiTreeNodeFlags_
 
 #ifndef IMGUI_DISABLE_OBSOLETE_FUNCTIONS
     ImGuiTreeNodeFlags_NavLeftJumpsBackHere = ImGuiTreeNodeFlags_NavLeftJumpsToParent,  // Renamed in 1.92.0
-    ImGuiTreeNodeFlags_SpanTextWidth        = ImGuiTreeNodeFlags_SpanLabelWidth,        // Renamed in 1.90.7
+    //ImGuiTreeNodeFlags_SpanTextWidth      = ImGuiTreeNodeFlags_SpanLabelWidth,        // Renamed in 1.90.7
     //ImGuiTreeNodeFlags_AllowItemOverlap   = ImGuiTreeNodeFlags_AllowOverlap,          // Renamed in 1.89.7
 #endif
 };
@@ -1940,6 +1941,8 @@ enum ImGuiStyleVar_
     ImGuiStyleVar_TableAngledHeadersTextAlign,// ImVec2  TableAngledHeadersTextAlign
     ImGuiStyleVar_TreeLinesSize,            // float     TreeLinesSize
     ImGuiStyleVar_TreeLinesRounding,        // float     TreeLinesRounding
+    ImGuiStyleVar_MenuItemRounding,         // float     MenuItemRounding
+    ImGuiStyleVar_SelectableRounding,       // float     SelectableRounding
     ImGuiStyleVar_DragDropTargetRounding,   // float     DragDropTargetRounding
     ImGuiStyleVar_ButtonTextAlign,          // ImVec2    ButtonTextAlign
     ImGuiStyleVar_SelectableTextAlign,      // ImVec2    SelectableTextAlign
@@ -2245,7 +2248,7 @@ struct ImGuiTableSortSpecs
 // Sorting specification for one column of a table (sizeof == 12 bytes)
 struct ImGuiTableColumnSortSpecs
 {
-    ImGuiID                     ColumnUserID;       // User id of the column (if specified by a TableSetupColumn() call)
+    ImGuiID                     ColumnUserID;       // User data for the column (if specified by a TableSetupColumn() call in the 'ImGuiID user_data' field). FIXME: Should be called 'UserData'..
     ImS16                       ColumnIndex;        // Index of the column
     ImS16                       SortOrder;          // Index within parent ImGuiTableSortSpecs (always stored in order starting from 0, tables sorted on a single criteria will always have a 0 here)
     ImGuiSortDirection          SortDirection;      // ImGuiSortDirection_Ascending or ImGuiSortDirection_Descending
@@ -2418,6 +2421,8 @@ struct ImGuiStyle
     ImGuiTreeNodeFlags TreeLinesFlags;      // Default way to draw lines connecting TreeNode hierarchy. ImGuiTreeNodeFlags_DrawLinesNone or ImGuiTreeNodeFlags_DrawLinesFull or ImGuiTreeNodeFlags_DrawLinesToNodes.
     float       TreeLinesSize;              // Thickness of outlines when using ImGuiTreeNodeFlags_DrawLines.
     float       TreeLinesRounding;          // Radius of lines connecting child nodes to the vertical line.
+    float       MenuItemRounding;           // Radius of MenuItem, BeginMenu rounding. 
+    float       SelectableRounding;         // Radius of Selectable rounding. MODIFYING THIS IS DISCOURAGED. CONTIGUOUS SELECTIONS WILL NOT LOOK RIGHT. (#7589)
     float       DragDropTargetRounding;     // Radius of the drag and drop target frame. When <0.0f: use FrameRounding.
     float       DragDropTargetBorderSize;   // Thickness of the drag and drop target border.
     float       DragDropTargetPadding;      // Size to expand the drag and drop target from actual target item size.
@@ -2725,7 +2730,7 @@ struct ImGuiIO
     //void*     ImeWindowHandle;                    // [Obsoleted in 1.87] Set ImGuiViewport::PlatformHandleRaw instead. Set this to your HWND to get automatic IME cursor positioning.
 
 #ifndef IMGUI_DISABLE_OBSOLETE_FUNCTIONS
-    float       FontGlobalScale;                    // Moved io.FontGlobalScale to style.FontScaleMain in 1.92 (June 2025)
+    float       FontGlobalScale;                    // Moved io.FontGlobalScale to style.FontScaleMain in 1.92.0 (June 2025)
 
     // Legacy: before 1.91.1, clipboard functions were stored in ImGuiIO instead of ImGuiPlatformIO.
     // As this is will affect all users of custom engines/backends, we are providing proper legacy redirection (will obsolete).
@@ -3185,6 +3190,7 @@ enum ImGuiMultiSelectFlags_
     ImGuiMultiSelectFlags_NavWrapX              = 1 << 16,  // [Temporary] Enable navigation wrapping on X axis. Provided as a convenience because we don't have a design for the general Nav API for this yet. When the more general feature be public we may obsolete this flag in favor of new one.
     ImGuiMultiSelectFlags_NoSelectOnRightClick  = 1 << 17,  // Disable default right-click processing, which selects item on mouse down, and is designed for context-menus.
     ImGuiMultiSelectFlags_SelectOnMask_         = ImGuiMultiSelectFlags_SelectOnAuto | ImGuiMultiSelectFlags_SelectOnClickAlways | ImGuiMultiSelectFlags_SelectOnClickRelease,
+    ImGuiMultiSelectFlags_CheckboxMode_         = 1 << 20,  // [Internal]
 
     // Obsolete names
 #ifndef IMGUI_DISABLE_OBSOLETE_FUNCTIONS
@@ -3413,6 +3419,7 @@ enum ImDrawListFlags_
     ImDrawListFlags_AntiAliasedLinesUseTex  = 1 << 1,  // Enable anti-aliased lines/borders using textures when possible. Require backend to render with bilinear filtering (NOT point/nearest filtering).
     ImDrawListFlags_AntiAliasedFill         = 1 << 2,  // Enable anti-aliased edge around filled shapes (rounded rectangles, circles).
     ImDrawListFlags_AllowVtxOffset          = 1 << 3,  // Can emit 'VtxOffset > 0' to allow large meshes. Set when 'ImGuiBackendFlags_RendererHasVtxOffset' is enabled.
+    ImDrawListFlags_TextNoPixelSnap         = 1 << 4,  // Disable automatically snapping AddText() calls to pixel boundaries.
 };
 
 // Draw command list
@@ -3564,8 +3571,8 @@ struct ImDrawList
     inline    void  PushTextureID(ImTextureRef tex_ref) { PushTexture(tex_ref); }   // RENAMED in 1.92.0
     inline    void  PopTextureID()                      { PopTexture(); }           // RENAMED in 1.92.0
 #else
-    IMGUI_API void  AddRect(const ImVec2& p_min, const ImVec2& p_max, ImU32 col, float rounding /*= 0.0f*/, ImDrawFlags flags /*= 0*/, float thickness /*= 1.0f*/) = delete;
-    IMGUI_API void  AddPolyline(const ImVec2* points, int num_points, ImU32 col, ImDrawFlags flags, float thickness) = delete;
+              void  AddRect(const ImVec2& p_min, const ImVec2& p_max, ImU32 col, float rounding /*= 0.0f*/, ImDrawFlags flags /*= 0*/, float thickness /*= 1.0f*/) = delete;
+              void  AddPolyline(const ImVec2* points, int num_points, ImU32 col, ImDrawFlags flags, float thickness) = delete;
     inline    void  PathStroke(ImU32 col, ImDrawFlags flags /*= 0*/, float thickness /*= 1.0f*/) = delete;
 #endif
     //inline  void  AddEllipse(const ImVec2& center, float radius_x, float radius_y, ImU32 col, float rot = 0.0f, int num_segments = 0, float thickness = 1.0f) { AddEllipse(center, ImVec2(radius_x, radius_y), col, rot, num_segments, thickness); } // OBSOLETED in 1.90.5 (Mar 2024)
@@ -3646,7 +3653,7 @@ enum ImTextureStatus
 // You may use ImTextureData::Updates[] for the list, or ImTextureData::UpdateBox for a single bounding box.
 struct ImTextureRect
 {
-    unsigned short      x, y;       // Upper-left coordinates of rectangle to update
+    unsigned short      x, y;       // Upper-left coordinates of rectangle to update, within the parent Pixels[] array.
     unsigned short      w, h;       // Size of rectangle to update (in pixels)
 };
 
@@ -3668,7 +3675,7 @@ struct ImTextureData
     int                 Width;                  // w    r   // Texture width
     int                 Height;                 // w    r   // Texture height
     int                 BytesPerPixel;          // w    r   // 4 or 1
-    unsigned char*      Pixels;                 // w    r   // Pointer to buffer holding 'Width*Height' pixels and 'Width*Height*BytesPerPixels' bytes.
+    unsigned char*      Pixels;                 // w    r   // Pointer to whole texture buffer holding 'Width*Height' pixels and 'Width*Height*BytesPerPixels' bytes.
     ImTextureRect       UsedRect;               // w    r   // Bounding box encompassing all past and queued Updates[].
     ImTextureRect       UpdateRect;             // w    r   // Bounding box encompassing all queued Updates[].
     ImVector<ImTextureRect> Updates;            // w    r   // Array of individual updates.
@@ -3678,7 +3685,7 @@ struct ImTextureData
     bool                WantDestroyNextFrame;   // rw   -   // [Internal] Queued to set ImTextureStatus_WantDestroy next frame. May still be used in the current frame.
 
     // Functions
-    // - If GetPixels() functions asserts while being called by your render loop, it could be caused by calling ImFontAtlas::Clear() instead of ClearFonts()?
+    // - If GetPixels() functions asserts while being called by your render loop, it could be caused by calling ImFontAtlas::Clear()/ClearFonts()?
     ImTextureData()     { memset((void*)this, 0, sizeof(*this)); Status = ImTextureStatus_Destroyed; TexID = ImTextureID_Invalid; }
     ~ImTextureData()    { DestroyPixels(); }
     IMGUI_API void      Create(ImTextureFormat format, int w, int h);
@@ -3832,14 +3839,16 @@ struct ImFontAtlas
     IMGUI_API ImFont*           AddFontFromMemoryTTF(void* font_data, int font_data_size, float size_pixels = 0.0f, const ImFontConfig* font_cfg = NULL, const ImWchar* glyph_ranges = NULL); // Note: Transfer ownership of 'ttf_data' to ImFontAtlas! Will be deleted after destruction of the atlas. Set font_cfg->FontDataOwnedByAtlas=false to keep ownership of your data and it won't be freed.
     IMGUI_API ImFont*           AddFontFromMemoryCompressedTTF(const void* compressed_font_data, int compressed_font_data_size, float size_pixels = 0.0f, const ImFontConfig* font_cfg = NULL, const ImWchar* glyph_ranges = NULL); // 'compressed_font_data' still owned by caller. Compress with binary_to_compressed_c.cpp.
     IMGUI_API ImFont*           AddFontFromMemoryCompressedBase85TTF(const char* compressed_font_data_base85, float size_pixels = 0.0f, const ImFontConfig* font_cfg = NULL, const ImWchar* glyph_ranges = NULL);              // 'compressed_font_data_base85' still owned by caller. Compress with binary_to_compressed_c.cpp with -base85 parameter.
-    IMGUI_API void              RemoveFont(ImFont* font);
-
-    IMGUI_API void              Clear();                    // Clear everything (fonts + textures). Don't call mid-frame!
-    IMGUI_API void              ClearFonts();               // Clear input+output font data/glyphs. You can call this mid-frame if you load new fonts afterwards!
-    IMGUI_API void              CompactCache();             // Compact cached glyphs and texture.
+    IMGUI_API void              RemoveFont(ImFont* font);                       // Remove a font
+    IMGUI_API void              CompactCache();                                 // Compact cached glyphs and texture.
     IMGUI_API void              SetFontLoader(const ImFontLoader* font_loader); // Change font loader at runtime.
 
-    // As we are transitioning toward a new font system, we expect to obsolete those soon:
+    // Clearing the atlas/fonts has little use nowadays, unless you want to batch remove all fonts. 
+    // - Since 1.92, you can call ClearFonts() mid-frame, if you load new fonts afterwards. 
+    // - As we are transitioning toward our new font system the semantic for those functions gets increasingly misleading and are often a source of issues.
+    //   TL;DR; most likely, don't use any of those functions. We expect to obsolete/rework them.
+    IMGUI_API void              Clear();                    // Clear everything (fonts + textures). Don't call mid-frame!
+    IMGUI_API void              ClearFonts();               // Clear input+output font data/glyphs. New fonts and textures will be recreated afterwards.
     IMGUI_API void              ClearInputData();           // [OBSOLETE] Clear input data (all ImFontConfig structures including sizes, TTF data, glyph ranges, etc.) = all the data used to build the texture and fonts.
     IMGUI_API void              ClearTexData();             // [OBSOLETE] Clear CPU-side copy of the texture data. Saves RAM once the texture has been copied to graphics memory.
 
@@ -4058,7 +4067,7 @@ struct ImFont
     IMGUI_API void              RenderChar(ImDrawList* draw_list, float size, const ImVec2& pos, ImU32 col, ImWchar c, const ImVec4* cpu_fine_clip = NULL);
     IMGUI_API void              RenderText(ImDrawList* draw_list, float size, const ImVec2& pos, ImU32 col, const ImVec4& clip_rect, const char* text_begin, const char* text_end, float wrap_width = 0.0f, ImDrawTextFlags flags = 0);
 #ifndef IMGUI_DISABLE_OBSOLETE_FUNCTIONS
-    inline const char*          CalcWordWrapPositionA(float scale, const char* text, const char* text_end, float wrap_width) { return CalcWordWrapPosition(LegacySize * scale, text, text_end, wrap_width); }
+    inline const char*          CalcWordWrapPositionA(float scale, const char* text, const char* text_end, float wrap_width) { return CalcWordWrapPosition(LegacySize * scale, text, text_end, wrap_width); } // Obsoleted old name in 1.92.0. Note how `scale` was to `size`.
 #endif
 
     // [Internal] Don't use!
