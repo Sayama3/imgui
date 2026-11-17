@@ -21,6 +21,9 @@
 
 // CHANGELOG
 // (minor and older changes stripped away, please see git history for details)
+//  2026-11-09: Inputs: iOS: restore SDL_StartTextInput()/SDL_StopTextInput() in IME handler for on-screen keyboard support. (#7636, #9474, #9617)
+//  2026-08-06: Fixed querying framebuffer scale when using Metal. (#5592)
+//  2026-07-15: Inputs: Android: restore SDL_StartTextInput()/SDL_StopTextInput() in IME handler for on-screen keyboard support. (#7636, #9474)
 //  2026-04-16: Made ImGui_ImplSDL2_GetContentScaleForWindow(), ImGui_ImplSDL2_GetContentScaleForDisplay() helpers return a minimum of 1.0f, as some Linux setup seems to report <1.0f value and this breaks scaling border size. (#9369)
 //  2026-02-13: Inputs: systems other than X11 are back to starting mouse capture on mouse down (reverts 2025-02-26 change). Only X11 requires waiting for a drag by default (not ideal, but a better default for X11 users). Added ImGui_ImplSDL2_SetMouseCaptureMode() for X11 debugger users. (#3650, #6410, #9235)
 //  2026-01-15: Changed GetClipboardText() handler to return nullptr on error aka clipboard contents is not text. Consistent with other backends. (#9168)
@@ -134,9 +137,17 @@
 #endif
 #define SDL_HAS_PER_MONITOR_DPI             SDL_VERSION_ATLEAST(2,0,4)
 #define SDL_HAS_VULKAN                      SDL_VERSION_ATLEAST(2,0,6)
+#if defined(__APPLE__)
+#define SDL_HAS_METAL                       SDL_VERSION_ATLEAST(2,0,14)
+#else
+#define SDL_HAS_METAL                       0
+#endif
 #define SDL_HAS_OPEN_URL                    SDL_VERSION_ATLEAST(2,0,14)
 #if SDL_HAS_VULKAN
 #include <SDL_vulkan.h>
+#endif
+#if SDL_HAS_METAL
+#include <SDL_metal.h>
 #endif
 
 // SDL Data
@@ -205,6 +216,18 @@ static void ImGui_ImplSDL2_PlatformSetImeData(ImGuiContext*, ImGuiViewport*, ImG
         r.w = 1;
         r.h = (int)data->InputLineHeight;
         SDL_SetTextInputRect(&r);
+
+#if defined(__ANDROID__) || (defined(__APPLE__) && TARGET_OS_IOS)
+        // SDL_StartTextInput() is needed on Android and iOS to show the on-screen keyboard. (#7636, #9474, #6306)
+        // It was removed in a7703fe6 due to concerns about its relation to desktop IME, but is required on mobile.
+        SDL_StartTextInput();
+#endif
+    }
+    else
+    {
+#if defined(__ANDROID__) || (defined(__APPLE__) && TARGET_OS_IOS)
+        SDL_StopTextInput();
+#endif
     }
 }
 
@@ -485,7 +508,7 @@ bool ImGui_ImplSDL2_ProcessEvent(const SDL_Event* event)
 }
 
 #ifdef __EMSCRIPTEN__
-EM_JS(void, ImGui_ImplSDL2_EmscriptenOpenURL, (char const* url), { url = url ? UTF8ToString(url) : null; if (url) window.open(url, '_blank'); });
+EM_JS(void, ImGui_ImplSDL2_EmscriptenOpenURL, (char const* url), { url = url ? UTF8ToString(url) : null; if (url) window.open(url, '_blank', 'noopener'); });
 #endif
 
 static bool ImGui_ImplSDL2_Init(SDL_Window* window, SDL_Renderer* renderer, void* sdl_gl_context)
@@ -886,6 +909,10 @@ static void ImGui_ImplSDL2_GetWindowSizeAndFramebufferScale(SDL_Window* window, 
 #if SDL_HAS_VULKAN
     else if (SDL_GetWindowFlags(window) & SDL_WINDOW_VULKAN)
         SDL_Vulkan_GetDrawableSize(window, &display_w, &display_h);
+#endif
+#if SDL_HAS_METAL
+    else if (SDL_GetWindowFlags(window) & SDL_WINDOW_METAL)
+        SDL_Metal_GetDrawableSize(window, &display_w, &display_h);
 #endif
     else
         SDL_GL_GetDrawableSize(window, &display_w, &display_h);
